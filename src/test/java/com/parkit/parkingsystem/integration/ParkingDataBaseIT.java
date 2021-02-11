@@ -7,6 +7,7 @@ import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
+import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,6 +32,9 @@ class ParkingDataBaseIT {
 
     @Mock
     private static InputReaderUtil inputReaderUtil;
+    
+    @Mock
+    private static SystemDateService systemDateService;
 
     @BeforeAll
     private static void setUp() throws Exception{
@@ -43,8 +47,16 @@ class ParkingDataBaseIT {
 
     @BeforeEach
     private void setUpPerTest() throws Exception {
-        when(inputReaderUtil.readSelection()).thenReturn(1);
+        //Mock inputReaderUtil settings:
+    	when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        //Mock systemDateService settings:
+        Long systemCurrentTimeMillis = System.currentTimeMillis();
+        Long systemCurrentTimeMillisPlusOneHour =  systemCurrentTimeMillis + 3600 * 1000;
+        when(systemDateService.getCurrentDate())
+        	.thenReturn(new Date(systemCurrentTimeMillis))	//first call will return the current time (for inTime value)
+        	.thenReturn(new Date(systemCurrentTimeMillisPlusOneHour)); //next call will return the current time + 1 hour (for outTime value)
+        //clean database:
         dataBasePrepareService.clearDataBaseEntries();
     }
 
@@ -56,7 +68,7 @@ class ParkingDataBaseIT {
     @Test
     public void testParkingACar(){
         //GIVEN
-    	ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    	ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, systemDateService);
     	//WHEN
     	parkingService.processIncomingVehicle();
         //THEN
@@ -79,7 +91,7 @@ class ParkingDataBaseIT {
     public void testParkingLotExit(){
         //GIVEN
     	testParkingACar();
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, systemDateService);
         //WHEN
         parkingService.processExitingVehicle();
         //THEN
@@ -88,7 +100,7 @@ class ParkingDataBaseIT {
         assertTrue(0!=resultTicket.getPrice()); //must be different from 0 since ExitingVehicle has triggered fare calculation 
         //In this case we can not know the exact time the outTime value of Ticket is created, so for test purpose 
     	//i just check the time difference in Ticket is less than 5sec (5000 msec), seems enough margin for database simple write+read :
-    	assertTrue(Math.abs((new Date()).getTime() - resultTicket.getOutTime().getTime())<5000);
+    	assertEquals(resultTicket.getOutTime().getTime() - resultTicket.getInTime().getTime(),(60*60*1000));
         
     }
 
