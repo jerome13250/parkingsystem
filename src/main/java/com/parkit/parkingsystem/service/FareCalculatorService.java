@@ -28,6 +28,11 @@ public class FareCalculatorService {
     }
     
     private double priceCalculate(long durationInMilliesec, double fareRatePerHour) {
+    	//Free 30-min parking:
+    	if ( durationInMilliesec < (30*60*1000) ) {
+    		return 0;
+    	}
+   	
     	return ((double)durationInMilliesec)/(3600*1000)*fareRatePerHour;
     }
     

@@ -85,7 +85,7 @@ class ParkingDataBaseIT {
         //THEN
         Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); //get the Ticket that has been saved in the database
         //check that the fare generated correctly in db:
-        assertNotEquals(0, resultTicket.getPrice()); //must be different from 0 since ExitingVehicle has triggered fare calculation 
+        assertTrue(0!=resultTicket.getPrice()); //must be different from 0 since ExitingVehicle has triggered fare calculation 
         //In this case we can not know the exact time the outTime value of Ticket is created, so for test purpose 
     	//i just check the time difference in Ticket is less than 5sec (5000 msec), seems enough margin for database simple write+read :
     	assertTrue(Math.abs((new Date()).getTime() - resultTicket.getOutTime().getTime())<5000);
