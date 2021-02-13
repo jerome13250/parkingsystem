@@ -13,8 +13,13 @@ public class DBConstants {
       + "where PARKING_NUMBER = ?";
 
   public static final String SAVE_TICKET = 
-      "insert into ticket(PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)"
-      + " values(?, ?, ?, ?, ?)";
+      "insert into ticket("
+      + "PARKING_NUMBER, "
+      + "VEHICLE_REG_NUMBER, "
+      + "PRICE, IN_TIME, "
+      + "OUT_TIME, "
+      + "DISCOUNT_PC)"
+      + " values(?, ?, ?, ?, ?, ?)";
   public static final String UPDATE_TICKET = 
       "update ticket "
       + "set PRICE=?, OUT_TIME=? "
@@ -25,6 +30,7 @@ public class DBConstants {
       + "t.PRICE, "
       + "t.IN_TIME, "
       + "t.OUT_TIME, "
+      + "t.DISCOUNT_PC, "
       + "p.TYPE "
       + "from ticket t, parking p "
       + "where p.parking_number = t.parking_number "

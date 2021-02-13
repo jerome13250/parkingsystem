@@ -152,5 +152,20 @@ public class FareCalculatorServiceTest {
     fareCalculatorService.calculateFare(ticket);
     assertEquals((24 * Fare.CAR_RATE_PER_HOUR), ticket.getPrice());
   } 
+  
+  @Test
+  public void calculateFareCarWith5pcDiscount() {
+    long systemCurrentTimeMillis = System.currentTimeMillis();
+    Date inTime = new Date(systemCurrentTimeMillis - (60 * 60 * 1000));
+    Date outTime = new Date(systemCurrentTimeMillis);
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+    ticket.setInTime(inTime);
+    ticket.setOutTime(outTime);
+    ticket.setParkingSpot(parkingSpot);
+    ticket.setDiscountPercentage(5);
+    fareCalculatorService.calculateFare(ticket);
+    assertEquals(Fare.CAR_RATE_PER_HOUR * 95 / 100, ticket.getPrice());
+  } 
 
 } 
