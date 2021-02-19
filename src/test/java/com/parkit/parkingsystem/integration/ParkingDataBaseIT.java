@@ -17,6 +17,7 @@ import java.util.Date;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,8 +56,8 @@ class ParkingDataBaseIT {
     Long systemCurrentTimeMillis = System.currentTimeMillis();
     Long systemCurrentTimeMillisPlusOneHour =  systemCurrentTimeMillis + 3600 * 1000;
     when(systemDateService.getCurrentDate())
-      //first call will return the current time (for inTime value):
-      .thenReturn(new Date(systemCurrentTimeMillis))
+    //first call will return the current time (for inTime value):
+    .thenReturn(new Date(systemCurrentTimeMillis))
         //2nd call will return the current time + 1 hour (for outTime value):
         .thenReturn(new Date(systemCurrentTimeMillisPlusOneHour)); 
     //clean database:
@@ -69,7 +70,7 @@ class ParkingDataBaseIT {
   } 
 
   @Test
-  public void testParkingACar() {
+  public void testParkingCar() {
     //GIVEN
     ParkingService parkingService = new ParkingService(
         inputReaderUtil,
@@ -79,7 +80,7 @@ class ParkingDataBaseIT {
     //WHEN
     parkingService.processIncomingVehicle();
     //THEN
-    
+
     //get the Ticket that has been saved in the database:
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
 
@@ -97,23 +98,32 @@ class ParkingDataBaseIT {
     assertEquals(null, resultTicket.getOutTime()); //must be null since outTime is unknown
 
     //check that Parking table is updated with availability:
-    assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); //Since we are using slot1, the next available slot must be 2
+    //Since we are using slot1, the next available slot must be 2
+    assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); 
   } 
 
   @Test
   public void testParkingLotExit() {
     //GIVEN
-    testParkingACar();
-    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, systemDateService);
+    //TODO: un test qui depend d'un autre test, c'est moche, faut il corriger ca ?
+    testParkingCar();  
+    ParkingService parkingService = new ParkingService(
+        inputReaderUtil,
+        parkingSpotDAO, 
+        ticketDAO, 
+        systemDateService);
     //WHEN
     parkingService.processExitingVehicle();
     //THEN
-    Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); //get the Ticket that has been saved in the database
-    //check that the fare generated correctly in db:
-    assertTrue(0 != resultTicket.getPrice()); //must be different from 0 since ExitingVehicle has triggered fare calculation 
+    //get the Ticket that has been saved in the database:
+    Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
+    //check that the fare generated correctly in db
+    //must be different from 0 since ExitingVehicle has triggered fare calculation:
+    assertTrue(0 != resultTicket.getPrice());  
     //In this case we can not know the exact time the outTime value of Ticket is created, so for test purpose 
     //i just check the time difference in Ticket is less than 5sec (5000 msec), seems enough margin for database simple write+read :
-    assertEquals(resultTicket.getOutTime().getTime() - resultTicket.getInTime().getTime(), (60 * 60 * 1000));
+    assertEquals(resultTicket.getOutTime().getTime() - resultTicket.getInTime().getTime(),
+        (60 * 60 * 1000));
 
   } 
 

@@ -15,6 +15,17 @@ public class ParkingSpotDAO {
 
   public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
+  
+  /**
+   * Get the next parking slot available according to the parking type required.
+   *
+   * @param parkingType The type of parking spot, must be an enum ParkingType.
+   *
+   * @return Integer that is the parking spot number available.
+   * 
+   * @see ParkingType
+   * 
+   */  
   public int getNextAvailableSlot(ParkingType parkingType) {
     Connection con = null;
     int result = -1;
@@ -35,7 +46,17 @@ public class ParkingSpotDAO {
     } 
     return result;
   } 
-
+  
+  /**
+   * Update a specific parking spot availability in database.
+   *
+   * @param parkingSpot The parking spot object to update in database.
+   *
+   * @return Integer that is the parking spot number available.
+   * 
+   * @see ParkingType
+   * 
+   */   
   public boolean updateParking(ParkingSpot parkingSpot) {
     //update the availability fo that parking slot
     Connection con = null;

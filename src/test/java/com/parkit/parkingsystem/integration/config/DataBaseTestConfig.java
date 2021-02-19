@@ -13,15 +13,32 @@ public class DataBaseTestConfig extends DataBaseConfig {
 
   private static final Logger logger = LogManager.getLogger("DataBaseTestConfig");
 
+  /**
+   * Get a Connection to the test database for integration test.
+   *
+   * @return Connection to the test database.
+   * 
+   * @see Connection
+   * 
+   */ 
+  @Override
   public Connection getConnection() throws ClassNotFoundException, SQLException {
     logger.info("Create DB connection");
     Class.forName("com.mysql.cj.jdbc.Driver");
     return DriverManager.getConnection(
-        "jdbc:mysql://localhost/test?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", 
+        "jdbc:mysql://localhost/test?useUnicode=true&useJDBCCompliantTimezoneShift=true"
+        + "&useLegacyDatetimeCode=false&serverTimezone=UTC", 
         "root", 
         "rootroot");
   } 
 
+  /**
+   * Close the Connection to the test database.
+   *
+   * @param con the Connection to close
+   * 
+   */
+  @Override
   public void closeConnection(Connection con) {
     if (con != null) {
       try {
@@ -32,7 +49,16 @@ public class DataBaseTestConfig extends DataBaseConfig {
       } 
     } 
   } 
-
+  
+  
+  /**
+   * Close a PreparedStatement in the test database.
+   *
+   * @param ps the PreparedStatement to close
+   * 
+   * @see PreparedStatement
+   */ 
+  @Override
   public void closePreparedStatement(PreparedStatement ps) {
     if (ps != null) {
       try {
@@ -44,6 +70,14 @@ public class DataBaseTestConfig extends DataBaseConfig {
     } 
   } 
 
+  /**
+   * Close a ResultSet.
+   *
+   * @param rs the ResultSet to close
+   * 
+   * @see ResultSet
+   */ 
+  @Override
   public void closeResultSet(ResultSet rs) {
     if (rs != null) {
       try {

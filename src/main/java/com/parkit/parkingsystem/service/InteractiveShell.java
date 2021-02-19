@@ -10,6 +10,9 @@ public class InteractiveShell {
 
   private static final Logger logger = LogManager.getLogger("InteractiveShell");
 
+  /**
+   * Initialize all required objects to run the application. 
+   */
   public static void loadInterface() {
     logger.info("App initialized!!!");
     System.out.println("Welcome to Parking System!");
@@ -19,7 +22,11 @@ public class InteractiveShell {
     ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO();
     TicketDAO ticketDAO = new TicketDAO();
     SystemDateService systemDateService = new SystemDateService();
-    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO, systemDateService);
+    ParkingService parkingService = new ParkingService(
+        inputReaderUtil, 
+        parkingSpotDAO, 
+        ticketDAO, 
+        systemDateService);
 
     while (continueApp) {
       loadMenu();
@@ -38,7 +45,8 @@ public class InteractiveShell {
           continueApp = false;
           break;
 
-        default: System.out.println("Unsupported option. Please enter a number corresponding to the provided menu");
+        default: System.out.println("Unsupported option."
+            + " Please enter a number corresponding to the provided menu");
       } 
     } 
   } 

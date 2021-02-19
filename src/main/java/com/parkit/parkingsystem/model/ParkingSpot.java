@@ -6,7 +6,17 @@ public class ParkingSpot {
   private int number;
   private ParkingType parkingType;
   private boolean isAvailable;
-
+  
+  /**
+   * Constructor for the ParkingSpot class.
+   *
+   * @param number the parking spot number, unique identifier of the parking spot.
+   * @param parkingType An enum ParkingType, type of the parking spot (car, bike, etc...)
+   * @param isAvailable boolean true if parking spot is available, false if not.
+   *
+   * @see ParkingType
+   * 
+   */
   public ParkingSpot(int number, ParkingType parkingType, boolean isAvailable) {
     this.number = number;
     this.parkingType = parkingType;

@@ -21,6 +21,23 @@ public class ParkingService {
   private TicketDAO ticketDAO;
   private SystemDateService systemDateService;
 
+  /**
+   * Constructor for the ParkingService class.
+   * 
+   * <p> This class uses the 4 following classes:</p>
+   * <ol>
+   * <li>InputReaderUtil : Input reader to get information from client</li>
+   * <li>ParkingSpotDAO : DAO for database access to ParkingSpot objects</li>
+   * <li>TicketDAO : DAO for database access to Ticket objects</li>
+   * <li>SystemDateService : Make the clock a service to allow easier unit testing</li>
+   * </ol>
+   *
+   * @see InputReaderUtil
+   * @see ParkingSpotDAO
+   * @see TicketDAO
+   * @see SystemDateService
+   * 
+   */
   public ParkingService(InputReaderUtil inputReaderUtil,
       ParkingSpotDAO parkingSpotDAO,
       TicketDAO ticketDAO,
@@ -30,40 +47,79 @@ public class ParkingService {
     this.ticketDAO = ticketDAO;
     this.systemDateService = systemDateService;
   } 
-
+  
+  /**
+   * Process a vehicle that requires entering the parking.
+   * 
+   * <p> The process follows the following steps:</p>
+   * <ol>
+   * <li>Check that a parking spot is available for the vehicle type</li>
+   * <li>Reserve the parking spot in the database</li>
+   * <li>Create a Ticket object with the required informations</li>
+   * <li>Allocate a 5% discount to the Ticket if the vehicle is already known</li>
+   * <li>Save the Ticket object in the database</li>
+   * </ol>
+   * 
+   */
   public void processIncomingVehicle() {
     try {
       ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
       if (parkingSpot != null && parkingSpot.getId() > 0) {
 
         parkingSpot.setAvailable(false);
-        parkingSpotDAO.updateParking(parkingSpot); //allot this parking space and mark it's availability as false
+        //allot this parking space and mark it's availability as false:
+        parkingSpotDAO.updateParking(parkingSpot); 
 
         Date inTime = systemDateService.getCurrentDate();
         Ticket ticket = new Ticket();
         String vehicleRegNumber = getVehichleRegNumber();
-        //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+        //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME, DISCOUNT_PC)
         //ticket.setId(ticketID);
         ticket.setParkingSpot(parkingSpot);
         ticket.setVehicleRegNumber(vehicleRegNumber);
         ticket.setPrice(0);
         ticket.setInTime(inTime);
         ticket.setOutTime(null);
+        //if vehicleRegNumber already present in db, then do a 5% discount:
+        if (ticketDAO.getTicket(vehicleRegNumber) != null) {
+          ticket.setDiscountPercentage(5);
+          System.out.println("Welcome back! As a recurring user of our parking lot, "
+              + "you'll benefit from a 5% discount.");
+        }
+
         ticketDAO.saveTicket(ticket);
         System.out.println("Generated Ticket and saved in DB");
         System.out.println("Please park your vehicle in spot number:" + parkingSpot.getId());
-        System.out.println("Recorded in-time for vehicle number:" + vehicleRegNumber + " is:" + inTime);
+        System.out.println("Recorded in-time for vehicle number:" 
+            + vehicleRegNumber + " is:" + inTime);
       } 
     } catch (Exception e) {
       logger.error("Unable to process incoming vehicle", e);
     } 
   } 
 
+  
+  /**
+   * Use the InputReaderUtil to request the vehicle registration number to the parking user.
+   *
+   * @return String object that is the vehicle registration number.
+   * 
+   * @see InputReaderUtil
+   * 
+   */
   private String getVehichleRegNumber() throws Exception {
     System.out.println("Please type the vehicle registration number and press enter key");
     return inputReaderUtil.readVehicleRegistrationNumber();
   } 
 
+
+  /**
+   * Look for a parking spot available according to the vehicle type.
+   * The vehicle type is provided by the call to {@code getVehichleType} method. 
+   *
+   * @return ParkingSpot object.
+   * 
+   */
   public ParkingSpot getNextParkingNumberIfAvailable() {
     int parkingNumber = 0;
     ParkingSpot parkingSpot = null;
@@ -83,6 +139,14 @@ public class ParkingService {
     return parkingSpot;
   } 
 
+  /**
+   * Get the vehicle type from  the inputReaderUtil calling {@code readSelection()} method.
+   *
+   * @return ParkingType object.
+   * 
+   * @see ParkingType
+   * 
+   */
   private ParkingType getVehichleType() {
     System.out.println("Please select vehicle type from menu");
     System.out.println("1 CAR");
@@ -101,7 +165,22 @@ public class ParkingService {
 
     } 
   } 
-
+  
+  
+  /**
+   * Process a vehicle that requires exiting the parking.
+   * 
+   * <p> The process follows the following steps:</p>
+   * <ol>
+   * <li>Get the vehicle registration number from inputReaderUtil</li>
+   * <li>Get the ticket from database according to registration number</li>
+   * <li>Update ticket outTime to the current time</li>
+   * <li>Update ticket price using fareCalculatorService</li>
+   * <li>Update ticket in database</li>
+   * <li>Update the parking spot to available in database</li>
+   * </ol>
+   * 
+   */
   public void processExitingVehicle() {
     try {
       String vehicleRegNumber = getVehichleRegNumber();
@@ -114,7 +193,8 @@ public class ParkingService {
         parkingSpot.setAvailable(true);
         parkingSpotDAO.updateParking(parkingSpot);
         System.out.println("Please pay the parking fare:" + ticket.getPrice());
-        System.out.println("Recorded out-time for vehicle number:" + ticket.getVehicleRegNumber() + " is:" + outTime);
+        System.out.println("Recorded out-time for vehicle number:" 
+            + ticket.getVehicleRegNumber() + " is:" + outTime);
       } else {
         System.out.println("Unable to update ticket information. Error occurred");
       } 
