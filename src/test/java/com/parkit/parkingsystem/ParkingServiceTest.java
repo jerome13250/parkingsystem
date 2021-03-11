@@ -12,6 +12,7 @@ import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.DiscountCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -29,6 +30,7 @@ public class ParkingServiceTest {
 
   long inTimeMillis;
   long outTimeMillis;
+  int discount;
   private static ParkingService parkingService;
 
   @Mock
@@ -39,19 +41,24 @@ public class ParkingServiceTest {
   private static TicketDAO ticketDAO;
   @Mock
   private static SystemDateService systemDateService;
+  @Mock
+  private static DiscountCalculatorService discountCalculatorService;
 
   @BeforeEach
   private void setUpPerTest() {
     //define fixed inTime and outTime:
     inTimeMillis = 1613568958807L;
     outTimeMillis = 1613568958807L + (60 * 60 * 1000); //1h later
+    //define discount %
+    discount = 25;
 
     //ParkingService construction:
     parkingService = new ParkingService(
         inputReaderUtil,
         parkingSpotDAO, 
         ticketDAO, 
-        systemDateService);
+        systemDateService,
+        discountCalculatorService);
 
   } 
 
@@ -69,9 +76,11 @@ public class ParkingServiceTest {
       ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
       when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
       when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
+      //Mock discountCalculatorService:
+      when(discountCalculatorService.calculateDiscount(any(Ticket.class))).thenReturn(discount);
+      
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("Failed to set up test mock objects");
     } 
 
     //WHEN
@@ -81,7 +90,7 @@ public class ParkingServiceTest {
     ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
     verify(ticketDAO, Mockito.times(1)).saveTicket(ticketCaptor.capture());
     Ticket ticket = ticketCaptor.getValue();
-    assertEquals(0, ticket.getDiscountPercentage());
+    assertEquals(discount, ticket.getDiscountPercentage());
     assertEquals(new Date(inTimeMillis), ticket.getInTime());
     assertEquals(null, ticket.getOutTime());
     assertEquals(0, ticket.getPrice());
@@ -113,6 +122,7 @@ public class ParkingServiceTest {
       ticket.setInTime(new Date(inTimeMillis));
       ticket.setParkingSpot(parkingSpot);
       ticket.setVehicleRegNumber("ABCDEF");
+      ticket.setDiscountPercentage(discount);
       when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
       when(ticketDAO.updateTicket(ticket)).thenReturn(true);
 
@@ -128,10 +138,10 @@ public class ParkingServiceTest {
     ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
     verify(ticketDAO, Mockito.times(1)).updateTicket(ticketCaptor.capture());
     Ticket ticket = ticketCaptor.getValue();
-    assertEquals(0, ticket.getDiscountPercentage());
+    assertEquals(discount, ticket.getDiscountPercentage());
     assertEquals(new Date(inTimeMillis), ticket.getInTime());
     assertEquals(new Date(outTimeMillis), ticket.getOutTime());
-    assertEquals(Fare.CAR_RATE_PER_HOUR, ticket.getPrice());
+    assertEquals(Fare.CAR_RATE_PER_HOUR * (100 - discount) / 100, ticket.getPrice());
     assertEquals("ABCDEF", ticket.getVehicleRegNumber());
     
     ArgumentCaptor<ParkingSpot> parkingSpotCaptor = ArgumentCaptor.forClass(ParkingSpot.class);

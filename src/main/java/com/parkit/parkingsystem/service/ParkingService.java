@@ -14,12 +14,14 @@ public class ParkingService {
 
   private static final Logger logger = LogManager.getLogger("ParkingService");
 
+  //TODO: pourquoi ce service est static + new  ici alors que toutes les autres classes sont dans le constructeur ?
   private static FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
   private InputReaderUtil inputReaderUtil;
   private ParkingSpotDAO parkingSpotDAO;
   private TicketDAO ticketDAO;
   private SystemDateService systemDateService;
+  private DiscountCalculatorService discountCalculatorService;
 
   /**
    * Constructor for the ParkingService class.
@@ -30,22 +32,26 @@ public class ParkingService {
    * <li>ParkingSpotDAO : DAO for database access to ParkingSpot objects</li>
    * <li>TicketDAO : DAO for database access to Ticket objects</li>
    * <li>SystemDateService : Make the clock a service to allow easier unit testing</li>
+   * <li>DiscountCalculatorService : calculate the discount to apply to a specific Ticket</li>
    * </ol>
    *
    * @see InputReaderUtil
    * @see ParkingSpotDAO
    * @see TicketDAO
    * @see SystemDateService
+   * @see DiscountCalculatorService
    * 
    */
   public ParkingService(InputReaderUtil inputReaderUtil,
       ParkingSpotDAO parkingSpotDAO,
       TicketDAO ticketDAO,
-      SystemDateService systemDateService) {
+      SystemDateService systemDateService,
+      DiscountCalculatorService discountCalculatorService) {
     this.inputReaderUtil = inputReaderUtil;
     this.parkingSpotDAO = parkingSpotDAO;
     this.ticketDAO = ticketDAO;
     this.systemDateService = systemDateService;
+    this.discountCalculatorService = discountCalculatorService;
   } 
   
   /**
@@ -80,12 +86,9 @@ public class ParkingService {
         ticket.setPrice(0);
         ticket.setInTime(inTime);
         ticket.setOutTime(null);
-        //if vehicleRegNumber already present in db, then do a 5% discount:
-        if (ticketDAO.getTicket(vehicleRegNumber) != null) {
-          ticket.setDiscountPercentage(5);
-          System.out.println("Welcome back! As a recurring user of our parking lot, "
-              + "you'll benefit from a 5% discount.");
-        }
+        //if vehicleRegNumber already present in db, then set a 5% discount:
+        ticket.setDiscountPercentage(
+            discountCalculatorService.calculateDiscount(ticket));
 
         ticketDAO.saveTicket(ticket);
         System.out.println("Generated Ticket and saved in DB");

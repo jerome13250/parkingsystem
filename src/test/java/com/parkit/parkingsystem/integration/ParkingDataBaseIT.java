@@ -10,6 +10,7 @@ import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.DiscountCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -31,6 +32,7 @@ class ParkingDataBaseIT {
   private static ParkingSpotDAO parkingSpotDAO;
   private static TicketDAO ticketDAO;
   private static DataBasePrepareService dataBasePrepareService;
+  private static DiscountCalculatorService discountCalculatorService;
 
   @Mock
   private static InputReaderUtil inputReaderUtil;
@@ -45,6 +47,7 @@ class ParkingDataBaseIT {
     ticketDAO = new TicketDAO();
     ticketDAO.dataBaseConfig = dataBaseTestConfig;
     dataBasePrepareService = new DataBasePrepareService();
+    discountCalculatorService = new DiscountCalculatorService(ticketDAO);
   } 
 
   @BeforeEach
@@ -76,7 +79,8 @@ class ParkingDataBaseIT {
         inputReaderUtil,
         parkingSpotDAO,
         ticketDAO,
-        systemDateService);
+        systemDateService,
+        discountCalculatorService);
     //WHEN
     parkingService.processIncomingVehicle();
     //THEN
@@ -111,7 +115,8 @@ class ParkingDataBaseIT {
         inputReaderUtil,
         parkingSpotDAO, 
         ticketDAO, 
-        systemDateService);
+        systemDateService,
+        discountCalculatorService);
     //WHEN
     parkingService.processExitingVehicle();
     //THEN

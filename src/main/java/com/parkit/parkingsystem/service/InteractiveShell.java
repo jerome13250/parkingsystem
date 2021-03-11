@@ -22,11 +22,14 @@ public class InteractiveShell {
     ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO();
     TicketDAO ticketDAO = new TicketDAO();
     SystemDateService systemDateService = new SystemDateService();
+    DiscountCalculatorService discountCalculatorService = new DiscountCalculatorService(ticketDAO);
+    
     ParkingService parkingService = new ParkingService(
         inputReaderUtil, 
         parkingSpotDAO, 
         ticketDAO, 
-        systemDateService);
+        systemDateService,
+        discountCalculatorService);
 
     while (continueApp) {
       loadMenu();
