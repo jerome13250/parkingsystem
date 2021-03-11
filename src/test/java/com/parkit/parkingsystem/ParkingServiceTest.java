@@ -18,6 +18,7 @@ import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +47,7 @@ public class ParkingServiceTest {
 
   @BeforeEach
   private void setUpPerTest() {
+   
     //define fixed inTime and outTime:
     inTimeMillis = 1613568958807L;
     outTimeMillis = 1613568958807L + (60 * 60 * 1000); //1h later
@@ -59,7 +61,7 @@ public class ParkingServiceTest {
         ticketDAO, 
         systemDateService,
         discountCalculatorService);
-
+    
   } 
 
   @Test
@@ -150,7 +152,7 @@ public class ParkingServiceTest {
     assertEquals(1, parkingSpot.getId());
     assertEquals(ParkingType.CAR, parkingSpot.getParkingType());
     assertEquals(true, parkingSpot.isAvailable());
-    
+
   } 
 
 
