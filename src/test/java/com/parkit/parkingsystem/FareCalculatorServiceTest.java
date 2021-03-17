@@ -34,6 +34,22 @@ public class FareCalculatorServiceTest {
   } 
 
   @Test
+  void calculateFare_outTimeNull_throwsIllegalArgumentException() {
+    //GIVEN
+    Date inTime = new Date(systemCurrentTimeMillis);
+    Date outTime = null; 
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+    ticket.setInTime(inTime);
+    ticket.setOutTime(outTime);
+    ticket.setParkingSpot(parkingSpot);
+    
+    //THEN
+    assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket));
+  } 
+  
+  
+  @Test
   public void calculateFareCar() {
     Date inTime = new Date(systemCurrentTimeMillis - (60 * 60 * 1000)); //Now - 1h
     Date outTime = new Date(systemCurrentTimeMillis); 

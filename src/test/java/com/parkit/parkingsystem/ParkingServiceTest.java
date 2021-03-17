@@ -1,6 +1,7 @@
 package com.parkit.parkingsystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import com.parkit.parkingsystem.util.InputReaderUtil;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -63,9 +65,64 @@ public class ParkingServiceTest {
         discountCalculatorService);
     
   } 
+  
+  
+  @Test
+  void getNextParkingNumberIfAvailableTest_souldReturnTypeCarId999() {
+    //GIVEN
+    when(inputReaderUtil.readSelection()).thenReturn(1);
+    when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(999);
+    
+    //WHEN
+    ParkingSpot resultParkingSpot = parkingService.getNextParkingNumberIfAvailable();
+    
+    //THEN
+    assertEquals(ParkingType.CAR, resultParkingSpot.getParkingType());
+    assertEquals(999, resultParkingSpot.getId());
+  }
+  
+  @Test
+  void getNextParkingNumberIfAvailableTest_souldReturnTypeBikeId555() {
+    //GIVEN
+    when(inputReaderUtil.readSelection()).thenReturn(2);
+    when(parkingSpotDAO.getNextAvailableSlot(ParkingType.BIKE)).thenReturn(555);
+    
+    //WHEN
+    ParkingSpot resultParkingSpot = parkingService.getNextParkingNumberIfAvailable();
+    
+    //THEN
+    assertEquals(ParkingType.BIKE, resultParkingSpot.getParkingType());
+    assertEquals(555, resultParkingSpot.getId());
+  }
+  
+  @Test
+  void getNextParkingNumberIfAvailableTest_ParkingSlotsFull_shouldReturnNull() {
+    //GIVEN
+    when(inputReaderUtil.readSelection()).thenReturn(1);
+    when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(0); //0 no slot available
+    
+    //WHEN
+    ParkingSpot resultParkingSpot = parkingService.getNextParkingNumberIfAvailable();
+    
+    //THEN
+    assertNull(resultParkingSpot);
+  }
+  
+  @Test
+  void getNextParkingNumberIfAvailableTest_InvalidInputReader_souldReturnNull() {
+    //GIVEN
+    when(inputReaderUtil.readSelection()).thenReturn(3);
+        
+    //WHEN
+    ParkingSpot resultParkingSpot = parkingService.getNextParkingNumberIfAvailable();
+    
+    //THEN
+    assertNull(resultParkingSpot);
+  }
+  
 
   @Test
-  public void processIncomingVehicle() {
+  public void processIncomingVehicleTest() {
     
     try {
       //GIVEN

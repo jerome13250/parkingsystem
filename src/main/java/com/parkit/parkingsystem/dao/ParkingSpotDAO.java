@@ -21,7 +21,7 @@ public class ParkingSpotDAO {
    *
    * @param parkingType The type of parking spot, must be an enum ParkingType.
    *
-   * @return Integer that is the parking spot number available.
+   * @return Integer that is the parking spot number available. 0 if no parking spot available.
    * 
    * @see ParkingType
    * 
@@ -34,8 +34,8 @@ public class ParkingSpotDAO {
       PreparedStatement ps = con.prepareStatement(DBConstants.GET_NEXT_PARKING_SPOT);
       ps.setString(1, parkingType.toString());
       ResultSet rs = ps.executeQuery();
-      if (rs.next()) {
-        result = rs.getInt(1);
+      if (rs.next()) {  //min() in sql returns an empty line with null even if no parking available 
+        result = rs.getInt(1); // if value is SQL NULL, the value returned is 0
       } 
       dataBaseConfig.closeResultSet(rs);
       dataBaseConfig.closePreparedStatement(ps);
@@ -54,7 +54,7 @@ public class ParkingSpotDAO {
    *
    * @return Integer that is the parking spot number available.
    * 
-   * @see ParkingType
+   * @see ParkingTypeExtended
    * 
    */   
   public boolean updateParking(ParkingSpot parkingSpot) {
