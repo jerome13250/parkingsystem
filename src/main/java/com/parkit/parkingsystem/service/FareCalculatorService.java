@@ -33,8 +33,7 @@ public class FareCalculatorService {
 
     //Calculate duration between OutTime and InTime in milliseconds :
     long durationInMilliesec = 
-        Math.abs(ticket.getOutTime().getTime() - ticket.getInTime().getTime());
-
+        ticket.getOutTime().getTime() - ticket.getInTime().getTime();
 
     switch (ticket.getParkingSpot().getParkingType()) {
       case CAR:

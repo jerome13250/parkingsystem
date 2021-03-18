@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
@@ -28,6 +29,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ParkingDataBaseIT {
 
+  Long systemCurrentTimeMillis;
+  Long systemCurrentTimeMillisPlusOneHour;
+  
   private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
   private static ParkingSpotDAO parkingSpotDAO;
   private static TicketDAO ticketDAO;
@@ -56,8 +60,8 @@ class ParkingDataBaseIT {
     when(inputReaderUtil.readSelection()).thenReturn(1);
     when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
     //Mock systemDateService settings:
-    Long systemCurrentTimeMillis = System.currentTimeMillis();
-    Long systemCurrentTimeMillisPlusOneHour =  systemCurrentTimeMillis + 3600 * 1000;
+    systemCurrentTimeMillis = System.currentTimeMillis();
+    systemCurrentTimeMillisPlusOneHour =  systemCurrentTimeMillis + 3600 * 1000;
     when(systemDateService.getCurrentDate())
     //first call will return the current time (for inTime value):
     .thenReturn(new Date(systemCurrentTimeMillis))
@@ -95,11 +99,11 @@ class ParkingDataBaseIT {
     assertEquals(1, resultTicket.getParkingSpot().getId());
     //must be 0 since outTime is unknown
     assertEquals(0, resultTicket.getPrice()); 
-    //In this case we can not know the exact time the inTime value of Ticket is created,
-    //so for test purpose i just check the time difference in Ticket is less than 5sec (5000 msec),
-    //seems enough margin for database simple write+read :
-    assertTrue(Math.abs((new Date()).getTime() - resultTicket.getInTime().getTime()) < 5000);
-    assertEquals(null, resultTicket.getOutTime()); //must be null since outTime is unknown
+    //Check inTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
+    //This means stored Time can be different from input time up to 1 second (1000 ms) :
+    assertTrue(Math.abs(systemCurrentTimeMillis - resultTicket.getInTime().getTime()) < 1000 );
+    //must be null since outTime is unknown :
+    assertEquals(null, resultTicket.getOutTime()); 
 
     //check that Parking table is updated with availability:
     //Since we are using slot1, the next available slot must be 2
@@ -122,13 +126,13 @@ class ParkingDataBaseIT {
     //THEN
     //get the Ticket that has been saved in the database:
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
-    //check that the fare generated correctly in db
-    //must be different from 0 since ExitingVehicle has triggered fare calculation:
-    assertTrue(0 != resultTicket.getPrice());  
-    //In this case we can not know the exact time the outTime value of Ticket is created, so for test purpose 
-    //i just check the time difference in Ticket is less than 5sec (5000 msec), seems enough margin for database simple write+read :
-    assertEquals(resultTicket.getOutTime().getTime() - resultTicket.getInTime().getTime(),
-        (60 * 60 * 1000));
+    //Check outTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
+    //This means stored Time can be different from input time up to 1 second (1000 ms) :
+    assertTrue(Math.abs(systemCurrentTimeMillisPlusOneHour - resultTicket.getOutTime().getTime()) < 1000 );
+    //check the fare for 1 hour CAR parking: 
+    //note that inTime comes from database so it is truncated to 1 second precision.
+    //outTime comes from real Date so 1ms precision, this induces a very small difference in price calculation
+    assertTrue(Math.abs(Fare.CAR_RATE_PER_HOUR - resultTicket.getPrice()) < 0.01);
 
   } 
 
