@@ -25,15 +25,12 @@ public class ParkingService {
 
   /**
    * Constructor for the ParkingService class.
-   * 
-   * <p> This class uses the 4 following classes:</p>
-   * <ol>
-   * <li>InputReaderUtil : Input reader to get information from client</li>
-   * <li>ParkingSpotDAO : DAO for database access to ParkingSpot objects</li>
-   * <li>TicketDAO : DAO for database access to Ticket objects</li>
-   * <li>SystemDateService : Make the clock a service to allow easier unit testing</li>
-   * <li>DiscountCalculatorService : calculate the discount to apply to a specific Ticket</li>
-   * </ol>
+   *
+   * @param inputReaderUtil Input reader to get information from client
+   * @param parkingSpotDAO DAO for database access to ParkingSpot objects
+   * @param ticketDAO DAO for database access to Ticket objects
+   * @param systemDateService Make the clock a service to allow easier unit testing
+   * @param discountCalculatorService calculate the discount to apply to a specific Ticket
    *
    * @see InputReaderUtil
    * @see ParkingSpotDAO
@@ -85,7 +82,6 @@ public class ParkingService {
         ticket.setVehicleRegNumber(vehicleRegNumber);
         ticket.setPrice(0);
         ticket.setInTime(inTime);
-        ticket.setOutTime(null);
         //if vehicleRegNumber already present in db, then set a 5% discount:
         ticket.setDiscountPercentage(
             discountCalculatorService.calculateDiscount(ticket));

@@ -1,6 +1,6 @@
 package com.parkit.parkingsystem.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -20,13 +20,12 @@ class DiscountCalculatorServiceTest {
   private DiscountCalculatorService discountCalculatorService;
 
   @Mock
-  private TicketDAO ticketDAO;
+  private TicketDAO ticketDAO; 
 
   @BeforeEach
   private void setUpPerTest() {
     discountCalculatorService = new DiscountCalculatorService(ticketDAO);
   } 
-
 
   @Test
   void testCalculateDiscount_returns5SinceAlreadyinDb() {
@@ -59,6 +58,4 @@ class DiscountCalculatorServiceTest {
     //THEN
     assertEquals(0, discount);
   }
-  
-  
 }

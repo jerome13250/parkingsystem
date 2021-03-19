@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class InputReaderUtil {
 
-  private static Scanner scan = new Scanner(System.in);
+  private static Scanner scan = new Scanner(System.in, "UTF-8");
   private static final Logger logger = LogManager.getLogger("InputReaderUtil");
 
   
@@ -21,8 +21,6 @@ public class InputReaderUtil {
    * Reads the user input in console and converts it to an integer.
    *
    * @return the converted integer.
-   * 
-   * @throws Exception if the input is invalid.
    * 
    */
   public int readSelection() {

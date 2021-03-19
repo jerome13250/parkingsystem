@@ -17,6 +17,9 @@ public class DataBaseConfig {
    * Open a database Connection.
    *
    * @return Connection JDBC to a database
+   *
+   * @throws ClassNotFoundException If JDBC driver is not found
+   * @throws SQLException Provides information on a database accesserror or other errors.
    * 
    * @see Connection
    * 

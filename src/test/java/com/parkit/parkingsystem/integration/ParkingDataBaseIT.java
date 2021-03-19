@@ -101,7 +101,7 @@ class ParkingDataBaseIT {
     assertEquals(0, resultTicket.getPrice()); 
     //Check inTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
     //This means stored Time can be different from input time up to 1 second (1000 ms) :
-    assertTrue(Math.abs(systemCurrentTimeMillis - resultTicket.getInTime().getTime()) < 1000 );
+    assertTrue(Math.abs(systemCurrentTimeMillis - resultTicket.getInTime().getTime()) < 1000);
     //must be null since outTime is unknown :
     assertEquals(null, resultTicket.getOutTime()); 
 
@@ -113,7 +113,6 @@ class ParkingDataBaseIT {
   @Test
   public void testParkingLotExit() {
     //GIVEN
-    //TODO: un test qui depend d'un autre test, c'est moche, faut il corriger ca ?
     testParkingCar();  
     ParkingService parkingService = new ParkingService(
         inputReaderUtil,
@@ -128,11 +127,15 @@ class ParkingDataBaseIT {
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
     //Check outTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
     //This means stored Time can be different from input time up to 1 second (1000 ms) :
-    assertTrue(Math.abs(systemCurrentTimeMillisPlusOneHour - resultTicket.getOutTime().getTime()) < 1000 );
+    assertTrue(Math.abs(systemCurrentTimeMillisPlusOneHour - resultTicket.getOutTime().getTime()) < 1000);
     //check the fare for 1 hour CAR parking: 
     //note that inTime comes from database so it is truncated to 1 second precision.
     //outTime comes from real Date so 1ms precision, this induces a very small difference in price calculation
     assertTrue(Math.abs(Fare.CAR_RATE_PER_HOUR - resultTicket.getPrice()) < 0.01);
+    
+    //check that Parking table is updated with availability:
+    //Since we are freeing slot1, the next available slot must be 1
+    assertEquals(1, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); 
 
   } 
 

@@ -41,7 +41,7 @@ public class FareCalculatorServiceTest {
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
     ticket.setInTime(inTime);
-    ticket.setOutTime(outTime);
+    //ticket.setOutTime(outTime);
     ticket.setParkingSpot(parkingSpot);
     
     //THEN
