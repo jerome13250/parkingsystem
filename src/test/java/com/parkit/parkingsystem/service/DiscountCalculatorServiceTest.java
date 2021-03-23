@@ -33,8 +33,8 @@ class DiscountCalculatorServiceTest {
     //new ticket we want to create
     Ticket ticketToCreate = new Ticket();
     ticketToCreate.setVehicleRegNumber("ABCDEF");
-    //Mock ticketDAO: returns a Ticket, no matter if empty...
-    when(ticketDAO.getTicket("ABCDEF")).thenReturn(new Ticket());
+    //Mock ticketDAO:
+    when(ticketDAO.existTicketInDatabase("ABCDEF")).thenReturn(true);
     
     //WHEN
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);
@@ -49,8 +49,8 @@ class DiscountCalculatorServiceTest {
     //new ticket we want to create
     Ticket ticketToCreate = new Ticket();
     ticketToCreate.setVehicleRegNumber("ABCDEF");
-    //Mock ticketDAO: returns a Ticket, no matter if empty...
-    when(ticketDAO.getTicket("ABCDEF")).thenReturn(null);
+    //Mock ticketDAO:
+    when(ticketDAO.existTicketInDatabase("ABCDEF")).thenReturn(false);
     
     //WHEN
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);

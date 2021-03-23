@@ -87,8 +87,6 @@ public class TicketDAO {
         ticket.setOutTime(rs.getTimestamp(5));
         ticket.setDiscountPercentage(rs.getInt(6));
       } 
-      dataBaseConfig.closeResultSet(rs);
-      dataBaseConfig.closePreparedStatement(ps);
     } catch (Exception ex) {
       logger.error("Error fetching next available slot", ex);
     } finally {
@@ -97,10 +95,10 @@ public class TicketDAO {
       dataBaseConfig.closeConnection(con);
     } 
     return ticket;
-    
+
   } 
-  
-  
+
+
   /**
    * Update a Ticket object in the database.
    *
@@ -128,6 +126,38 @@ public class TicketDAO {
       dataBaseConfig.closePreparedStatement(ps);
       dataBaseConfig.closeConnection(con);
     } 
+    return false;
+  } 
+
+
+  /**
+   * Check that a Ticket exist in database with required vehicle registration number.
+   *
+   * @param vehicleRegNumber the required vehicle registration number.
+   *
+   * @return true if one or more tickets exist in database.
+   * 
+   */
+  public boolean existTicketInDatabase(String vehicleRegNumber) {
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+      con = dataBaseConfig.getConnection();
+      ps = con.prepareStatement(DBConstants.COUNT_TICKET); 
+      ps.setString(1, vehicleRegNumber);
+      rs = ps.executeQuery();
+      if (rs.next() && rs.getInt(1) > 0) { 
+        return true;
+      } 
+    } catch (Exception ex) {
+      logger.error("Error counting tickets", ex);
+    } finally {
+      dataBaseConfig.closeResultSet(rs);
+      dataBaseConfig.closePreparedStatement(ps);
+      dataBaseConfig.closeConnection(con);
+    } 
+
     return false;
   } 
 } 

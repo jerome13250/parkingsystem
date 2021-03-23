@@ -33,7 +33,7 @@ public class DiscountCalculatorService {
    */
   public int calculateDiscount(Ticket ticket) {
 
-    if (ticketDAO.getTicket(ticket.getVehicleRegNumber()) != null) {
+    if (ticketDAO.existTicketInDatabase(ticket.getVehicleRegNumber())) {
       System.out.println("Welcome back! As a recurring user of our parking lot, "
           + "you'll benefit from a 5% discount.");
       return 5;

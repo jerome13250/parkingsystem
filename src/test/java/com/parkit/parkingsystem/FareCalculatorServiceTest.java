@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 public class FareCalculatorServiceTest {
 
   private static FareCalculatorService fareCalculatorService;
@@ -43,12 +44,12 @@ public class FareCalculatorServiceTest {
     ticket.setInTime(inTime);
     //ticket.setOutTime(outTime);
     ticket.setParkingSpot(parkingSpot);
-    
+
     //THEN
     assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket));
   } 
-  
-  
+
+
   @Test
   public void calculateFareCar() {
     Date inTime = new Date(systemCurrentTimeMillis - (60 * 60 * 1000)); //Now - 1h
@@ -197,5 +198,6 @@ public class FareCalculatorServiceTest {
     fareCalculatorService.calculateFare(ticket);
     assertEquals(Fare.BIKE_RATE_PER_HOUR * 95 / 100, ticket.getPrice());
   } 
+
 
 } 
