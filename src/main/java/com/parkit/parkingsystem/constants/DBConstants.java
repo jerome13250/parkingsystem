@@ -37,8 +37,5 @@ public class DBConstants {
       + "and t.VEHICLE_REG_NUMBER=? "
       + "order by t.IN_TIME  "
       + "limit 1";
-  public static final String COUNT_TICKET =
-      "select count(ID) "
-      + "from ticket "
-      + "where VEHICLE_REG_NUMBER = ? ";
+ 
 } 

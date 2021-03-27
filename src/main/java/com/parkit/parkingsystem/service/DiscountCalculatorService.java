@@ -9,9 +9,9 @@ import com.parkit.parkingsystem.model.Ticket;
  *@author jerome
  */
 public class DiscountCalculatorService {
-  
+
   TicketDAO ticketDAO;
-  
+
   /**
    * Constructor for DiscountCalculatorService.
    *
@@ -33,14 +33,22 @@ public class DiscountCalculatorService {
    */
   public int calculateDiscount(Ticket ticket) {
 
-    if (ticketDAO.existTicketInDatabase(ticket.getVehicleRegNumber())) {
+    if (existTicketInDatabase(ticket.getVehicleRegNumber())) {
       System.out.println("Welcome back! As a recurring user of our parking lot, "
           + "you'll benefit from a 5% discount.");
       return 5;
     } 
-    
+
     return 0;
   }
+
+
+  private boolean existTicketInDatabase(String vehicleRegNumber) {
+
+    return (ticketDAO.getTicket(vehicleRegNumber) != null) ? true : false;
+
+  }
+
 
 
 }

@@ -34,7 +34,7 @@ class DiscountCalculatorServiceTest {
     Ticket ticketToCreate = new Ticket();
     ticketToCreate.setVehicleRegNumber("ABCDEF");
     //Mock ticketDAO:
-    when(ticketDAO.existTicketInDatabase("ABCDEF")).thenReturn(true);
+    when(ticketDAO.getTicket("ABCDEF")).thenReturn(new Ticket());
     
     //WHEN
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);
@@ -50,7 +50,7 @@ class DiscountCalculatorServiceTest {
     Ticket ticketToCreate = new Ticket();
     ticketToCreate.setVehicleRegNumber("ABCDEF");
     //Mock ticketDAO:
-    when(ticketDAO.existTicketInDatabase("ABCDEF")).thenReturn(false);
+    when(ticketDAO.getTicket("ABCDEF")).thenReturn(null);
     
     //WHEN
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);
