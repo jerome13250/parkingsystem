@@ -35,7 +35,6 @@ public class TicketDAO {
       con = dataBaseConfig.getConnection();
       ps = con.prepareStatement(DBConstants.SAVE_TICKET);
       //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-      //ps.setInt(1, ticket.getId());
       ps.setInt(1, ticket.getParkingSpot().getId());
       ps.setString(2, ticket.getVehicleRegNumber());
       ps.setDouble(3, ticket.getPrice());
@@ -70,7 +69,7 @@ public class TicketDAO {
     ResultSet rs = null;
     try {
       con = dataBaseConfig.getConnection();
-      //TODO: la requete parait fausse "order by t.IN_TIME  " donc si on a plusieurs entrees on sortira toujours la plus vieille ????
+      //TODO: la requete est fausse "order by t.IN_TIME  " manque un DESC
       ps = con.prepareStatement(DBConstants.GET_TICKET); 
       //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
       ps.setString(1, vehicleRegNumber);

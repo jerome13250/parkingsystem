@@ -14,7 +14,6 @@ public class ParkingService {
 
   private static final Logger logger = LogManager.getLogger("ParkingService");
 
-  //TODO: pourquoi ce service est static + new  ici alors que toutes les autres classes sont dans le constructeur ?
   private static FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
   private InputReaderUtil inputReaderUtil;
@@ -77,7 +76,6 @@ public class ParkingService {
         Ticket ticket = new Ticket();
         String vehicleRegNumber = getVehichleRegNumber();
         //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME, DISCOUNT_PC)
-        //ticket.setId(ticketID);
         ticket.setParkingSpot(parkingSpot);
         ticket.setVehicleRegNumber(vehicleRegNumber);
         ticket.setPrice(0);

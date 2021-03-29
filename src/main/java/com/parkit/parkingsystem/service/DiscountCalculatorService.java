@@ -26,7 +26,7 @@ public class DiscountCalculatorService {
    *
    * @param ticket the ticket object to check for discount.
    *
-   * @return the calculated discount percentage, integer value. Example: return integer 5 for a 5% discount.
+   * @return the calculated discount percentage, int value. Ex: return integer 5 for a 5% discount.
    *
    * @see Ticket
    * 
@@ -45,7 +45,7 @@ public class DiscountCalculatorService {
 
   private boolean existTicketInDatabase(String vehicleRegNumber) {
 
-    return (ticketDAO.getTicket(vehicleRegNumber) != null) ? true : false;
+    return (ticketDAO.getTicket(vehicleRegNumber) != null);
 
   }
 

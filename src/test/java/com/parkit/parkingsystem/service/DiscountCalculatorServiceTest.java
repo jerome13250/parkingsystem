@@ -28,7 +28,7 @@ class DiscountCalculatorServiceTest {
   } 
 
   @Test
-  void testCalculateDiscount_returns5SinceAlreadyinDb() {
+  void testCalculateDiscountReturns5SinceAlreadyinDb() {
     //GIVEN
     //new ticket we want to create
     Ticket ticketToCreate = new Ticket();
@@ -40,11 +40,14 @@ class DiscountCalculatorServiceTest {
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);
     
     //THEN
-    assertEquals(5, discount);
+    assertEquals(
+        5,
+        discount,
+        "Discount should be 5 since a ticket with same reg number already exists in DB");
   }
   
   @Test
-  void testCalculateDiscount_returns0SinceNotinDb() {
+  void testCalculateDiscountReturns0SinceNotinDb() {
     //GIVEN
     //new ticket we want to create
     Ticket ticketToCreate = new Ticket();
@@ -56,6 +59,9 @@ class DiscountCalculatorServiceTest {
     int discount = discountCalculatorService.calculateDiscount(ticketToCreate);
     
     //THEN
-    assertEquals(0, discount);
+    assertEquals(
+        0,
+        discount,
+        "Discount should be 0 since no ticket with same reg number exists in DB");
   }
 }

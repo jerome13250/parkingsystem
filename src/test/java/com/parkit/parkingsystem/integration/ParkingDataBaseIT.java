@@ -1,6 +1,7 @@
 package com.parkit.parkingsystem.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +78,7 @@ class ParkingDataBaseIT {
   } 
 
   @Test
-  public void testParkingCar() {
+  void testParkingLotEnter() {
     //GIVEN
     ParkingService parkingService = new ParkingService(
         inputReaderUtil,
@@ -87,33 +88,45 @@ class ParkingDataBaseIT {
         discountCalculatorService);
     //WHEN
     parkingService.processIncomingVehicle();
-    //THEN
 
+    //THEN
     //get the Ticket that has been saved in the database:
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
 
-    //check that a ticket is actually saved in DB
-    //must be 1 since DB is empty:
-    assertEquals(1, resultTicket.getId()); 
-    //must be 1 since it is the first slot available for TYPE=CAR in table parking:
-    assertEquals(1, resultTicket.getParkingSpot().getId());
-    //must be 0 since outTime is unknown
-    assertEquals(0, resultTicket.getPrice()); 
+    //check that the ticket in database has the correct values:
+    assertEquals(
+        1,
+        resultTicket.getId(),
+        "Must be 1 since database was empty and id is auto-generated primary key"); 
+    assertEquals(
+        1,
+        resultTicket.getParkingSpot().getId(),
+        "must be 1 since it is the first slot available for TYPE=CAR in table parking");
+    assertEquals(
+        0,
+        resultTicket.getPrice(),
+        "Must be 0 since fare can only be calculated when exiting parking"); 
     //Check inTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
     //This means stored Time can be different from input time up to 1 second (1000 ms) :
-    assertTrue(Math.abs(systemCurrentTimeMillis - resultTicket.getInTime().getTime()) < 1000);
-    //must be null since outTime is unknown :
-    assertEquals(null, resultTicket.getOutTime()); 
-
+    assertEquals(
+        systemCurrentTimeMillis,
+        resultTicket.getInTime().getTime(),
+        1000, //delta 1s (1000 ms)
+        "InTime date stored in database ticket must be the one provided "
+        + "by mocked systemDateService with 1s delta allowed");
+    assertNull(resultTicket.getOutTime(), "OutTime must be null since we did not exist parking"); 
+    
     //check that Parking table is updated with availability:
-    //Since we are using slot1, the next available slot must be 2
-    assertEquals(2, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); 
+    assertEquals(
+        2,
+        parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR),
+        "Since we are using slot1, the next available slot in database must be 2"); 
   } 
 
   @Test
-  public void testParkingLotExit() {
+  void testParkingLotExit() {
     //GIVEN
-    testParkingCar();  
+    testParkingLotEnter();  
     ParkingService parkingService = new ParkingService(
         inputReaderUtil,
         parkingSpotDAO, 
@@ -127,15 +140,27 @@ class ParkingDataBaseIT {
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
     //Check outTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
     //This means stored Time can be different from input time up to 1 second (1000 ms) :
-    assertTrue(Math.abs(systemCurrentTimeMillisPlusOneHour - resultTicket.getOutTime().getTime()) < 1000);
+    assertEquals(
+        systemCurrentTimeMillisPlusOneHour,
+        resultTicket.getOutTime().getTime(),
+        1000, //delta 1s (1000 ms)
+        "OutTime date stored in database ticket must be the one provided "
+            + "by mocked systemDateService with 1s delta allowed");
     //check the fare for 1 hour CAR parking: 
     //note that inTime comes from database so it is truncated to 1 second precision.
-    //outTime comes from real Date so 1ms precision, this induces a very small difference in price calculation
-    assertTrue(Math.abs(Fare.CAR_RATE_PER_HOUR - resultTicket.getPrice()) < 0.01);
+    //outTime comes from real Date so 1ms precision, this induces a small delta in price calculation
+    assertEquals(
+        Fare.CAR_RATE_PER_HOUR,
+        resultTicket.getPrice(),
+        0.01,
+        "For 1hour parking car, fare must be Fare.CAR_RATE_PER_HOUR, "
+        + "1 centime delta allowed due to MySQL DATETIME precision");
     
     //check that Parking table is updated with availability:
-    //Since we are freeing slot1, the next available slot must be 1
-    assertEquals(1, parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)); 
+    assertEquals(
+        1,
+        parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR),
+        "Since we have freed slot1, the next available slot must be 1"); 
 
   } 
 
