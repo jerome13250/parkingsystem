@@ -14,8 +14,7 @@ public class ParkingService {
 
   private static final Logger logger = LogManager.getLogger("ParkingService");
 
-  private static FareCalculatorService fareCalculatorService = new FareCalculatorService();
-
+  private FareCalculatorService fareCalculatorService;
   private InputReaderUtil inputReaderUtil;
   private ParkingSpotDAO parkingSpotDAO;
   private TicketDAO ticketDAO;
@@ -25,12 +24,14 @@ public class ParkingService {
   /**
    * Constructor for the ParkingService class.
    *
+   * @param fareCalculatorService Service to calculate the ticket price
    * @param inputReaderUtil Input reader to get information from client
    * @param parkingSpotDAO DAO for database access to ParkingSpot objects
    * @param ticketDAO DAO for database access to Ticket objects
    * @param systemDateService Make the clock a service to allow easier unit testing
    * @param discountCalculatorService calculate the discount to apply to a specific Ticket
    *
+   * @see FareCalculatorService
    * @see InputReaderUtil
    * @see ParkingSpotDAO
    * @see TicketDAO
@@ -38,11 +39,14 @@ public class ParkingService {
    * @see DiscountCalculatorService
    * 
    */
-  public ParkingService(InputReaderUtil inputReaderUtil,
+  public ParkingService(
+      FareCalculatorService fareCalculatorService,
+      InputReaderUtil inputReaderUtil,
       ParkingSpotDAO parkingSpotDAO,
       TicketDAO ticketDAO,
       SystemDateService systemDateService,
       DiscountCalculatorService discountCalculatorService) {
+    this.fareCalculatorService = fareCalculatorService;
     this.inputReaderUtil = inputReaderUtil;
     this.parkingSpotDAO = parkingSpotDAO;
     this.ticketDAO = ticketDAO;
@@ -184,7 +188,7 @@ public class ParkingService {
       Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
       Date outTime = systemDateService.getCurrentDate();
       ticket.setOutTime(outTime);
-      fareCalculatorService.calculateFare(ticket);
+      ticket.setPrice(fareCalculatorService.calculateFare(ticket));
       if (ticketDAO.updateTicket(ticket)) {
         ParkingSpot parkingSpot = ticket.getParkingSpot();
         parkingSpot.setAvailable(true);

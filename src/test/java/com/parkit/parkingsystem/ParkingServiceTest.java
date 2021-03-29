@@ -15,6 +15,7 @@ import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.DiscountCalculatorService;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -33,8 +34,11 @@ class ParkingServiceTest {
   long inTimeMillis;
   long outTimeMillis;
   int discount;
+  
   private static ParkingService parkingService;
-
+  
+  @Mock
+  private static FareCalculatorService fareCalculatorService;
   @Mock
   private static InputReaderUtil inputReaderUtil;
   @Mock
@@ -57,6 +61,7 @@ class ParkingServiceTest {
 
     //ParkingService construction:
     parkingService = new ParkingService(
+        fareCalculatorService,
         inputReaderUtil,
         parkingSpotDAO, 
         ticketDAO, 
@@ -227,6 +232,8 @@ class ParkingServiceTest {
       ticket.setParkingSpot(parkingSpot);
       when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
       when(ticketDAO.updateTicket(ticket)).thenReturn(true);
+      //Mock FareCalculatorService:
+      when(fareCalculatorService.calculateFare(any(Ticket.class))).thenReturn(1000.123d);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -237,6 +244,7 @@ class ParkingServiceTest {
     parkingService.processExitingVehicle();
 
     //THEN
+    //TICKET UPDATE:
     ArgumentCaptor<Ticket> ticketCaptor = ArgumentCaptor.forClass(Ticket.class);
     verify(ticketDAO, Mockito.times(1)).updateTicket(ticketCaptor.capture());
     Ticket ticket = ticketCaptor.getValue();
@@ -262,12 +270,12 @@ class ParkingServiceTest {
         "ticket outTime value must be " + outTimeMillis + " coming from "
             + "mocked systemDateService.getCurrentDate");
     assertEquals(
-        Fare.CAR_RATE_PER_HOUR * (100 - discount) / 100,
+        1000.123d,
         ticket.getPrice(),
-        //TODO : Ajouter le commentaire apres passage de fareCalculatorService en injection de dependance
-        "");
+        "ticket price value must be " + 1000.123 + " coming from "
+            + "mocked fareCalculatorService.calculateFare"); 
     
-    
+    //PARKING SPOT UPDATE:
     ArgumentCaptor<ParkingSpot> parkingSpotCaptor = ArgumentCaptor.forClass(ParkingSpot.class);
     verify(parkingSpotDAO, Mockito.times(1)).updateParking(parkingSpotCaptor.capture());
     ParkingSpot parkingSpot = parkingSpotCaptor.getValue();

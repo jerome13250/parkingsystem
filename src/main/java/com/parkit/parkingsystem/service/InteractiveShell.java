@@ -18,6 +18,7 @@ public class InteractiveShell {
     System.out.println("Welcome to Parking System!");
 
     boolean continueApp = true;
+    FareCalculatorService fareCalculatorService = new FareCalculatorService();
     InputReaderUtil inputReaderUtil = new InputReaderUtil();
     ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO();
     TicketDAO ticketDAO = new TicketDAO();
@@ -25,6 +26,7 @@ public class InteractiveShell {
     DiscountCalculatorService discountCalculatorService = new DiscountCalculatorService(ticketDAO);
     
     ParkingService parkingService = new ParkingService(
+        fareCalculatorService,
         inputReaderUtil, 
         parkingSpotDAO, 
         ticketDAO, 

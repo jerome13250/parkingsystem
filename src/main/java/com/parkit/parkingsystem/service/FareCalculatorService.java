@@ -14,11 +14,13 @@ public class FareCalculatorService {
    * Calculate the parking fare for a specific ticket and update it in {@code Ticket.fare}.
    *
    * @param ticket the ticket object to update.
+   * 
+   * @return  the calculated price
    *
    * @see Ticket
    * 
    */
-  public void calculateFare(Ticket ticket) {
+  public double calculateFare(Ticket ticket) {
     if (ticket.getOutTime() == null) {
       throw new IllegalArgumentException("Out time provided is null");
     } 
@@ -37,16 +39,13 @@ public class FareCalculatorService {
 
     switch (ticket.getParkingSpot().getParkingType()) {
       case CAR:
-        ticket.setPrice(priceCalc(durationInMilliesec, 
+        return (priceCalc(durationInMilliesec, 
             Fare.CAR_RATE_PER_HOUR, 
             ticket.getDiscountPercentage()));
-        break;
-
       case BIKE: 
-        ticket.setPrice(priceCalc(durationInMilliesec, 
+        return (priceCalc(durationInMilliesec, 
             Fare.BIKE_RATE_PER_HOUR, 
             ticket.getDiscountPercentage()));
-        break;
 
       default: throw new IllegalArgumentException("Unkown Parking Type");
     } 

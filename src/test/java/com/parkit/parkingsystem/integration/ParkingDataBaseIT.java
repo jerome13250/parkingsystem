@@ -11,8 +11,10 @@ import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
+import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.DiscountCalculatorService;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -34,6 +36,7 @@ class ParkingDataBaseIT {
   Long systemCurrentTimeMillisPlusOneHour;
   
   private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
+  private static FareCalculatorService fareCalculatorService;
   private static ParkingSpotDAO parkingSpotDAO;
   private static TicketDAO ticketDAO;
   private static DataBasePrepareService dataBasePrepareService;
@@ -47,6 +50,7 @@ class ParkingDataBaseIT {
 
   @BeforeAll
   private static void setUp() throws Exception {
+    fareCalculatorService = new FareCalculatorService();
     parkingSpotDAO = new ParkingSpotDAO();
     parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
     ticketDAO = new TicketDAO();
@@ -81,6 +85,7 @@ class ParkingDataBaseIT {
   void testParkingLotEnter() {
     //GIVEN
     ParkingService parkingService = new ParkingService(
+        fareCalculatorService,
         inputReaderUtil,
         parkingSpotDAO,
         ticketDAO,
@@ -94,19 +99,19 @@ class ParkingDataBaseIT {
     Ticket resultTicket = ticketDAO.getTicket("ABCDEF"); 
 
     //check that the ticket in database has the correct values:
-    assertEquals(
-        1,
-        resultTicket.getId(),
-        "Must be 1 since database was empty and id is auto-generated primary key"); 
+    //id
+    assertEquals(1, resultTicket.getId(), "Must be 1 since db was empty"); 
+    //vehicleRegNumber
+    assertEquals("ABCDEF", resultTicket.getVehicleRegNumber(),
+        "must be equal to mocked ticketDAO.getTicket value");
+    //price
+    assertEquals(0, resultTicket.getPrice(), "Must be 0 since we are entering parking"); 
+    //parkingSpot
     assertEquals(
         1,
         resultTicket.getParkingSpot().getId(),
         "must be 1 since it is the first slot available for TYPE=CAR in table parking");
-    assertEquals(
-        0,
-        resultTicket.getPrice(),
-        "Must be 0 since fare can only be calculated when exiting parking"); 
-    //Check inTime value :  fractional second in our MySQL DATETIME is default so precision is 0.
+    //inTime :  fractional second in our MySQL DATETIME is default so precision is 0.
     //This means stored Time can be different from input time up to 1 second (1000 ms) :
     assertEquals(
         systemCurrentTimeMillis,
@@ -114,7 +119,10 @@ class ParkingDataBaseIT {
         1000, //delta 1s (1000 ms)
         "InTime date stored in database ticket must be the one provided "
         + "by mocked systemDateService with 1s delta allowed");
-    assertNull(resultTicket.getOutTime(), "OutTime must be null since we did not exist parking"); 
+    //outTime
+    assertNull(resultTicket.getOutTime(), "OutTime must be null since we did not exit parking"); 
+    //discountPercentage
+    assertEquals(0, resultTicket.getDiscountPercentage(), "Must be 0 since first entry in db");
     
     //check that Parking table is updated with availability:
     assertEquals(
@@ -128,6 +136,7 @@ class ParkingDataBaseIT {
     //GIVEN
     testParkingLotEnter();  
     ParkingService parkingService = new ParkingService(
+        fareCalculatorService,
         inputReaderUtil,
         parkingSpotDAO, 
         ticketDAO, 
@@ -152,7 +161,7 @@ class ParkingDataBaseIT {
     assertEquals(
         Fare.CAR_RATE_PER_HOUR,
         resultTicket.getPrice(),
-        0.01,
+        0.01, //price delta
         "For 1hour parking car, fare must be Fare.CAR_RATE_PER_HOUR, "
         + "1 centime delta allowed due to MySQL DATETIME precision");
     
