@@ -60,8 +60,10 @@ public class FareCalculatorService {
       return 0;
     } 
 
-    return ((double) durationInMilliesec) / (3600 * 1000) 
-        * fareRatePerHour * (100 - discountPercentage) / 100;
+    return (double) Math.round(
+         ((double) durationInMilliesec / (3600 * 1000)) 
+          * (fareRatePerHour * (100 - discountPercentage) / 100)
+          * 100) / 100;
   } 
 
 } 

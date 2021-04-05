@@ -84,7 +84,8 @@ class FareCalculatorServiceTest {
     double price = fareCalculatorService.calculateFare(ticket);
     
     //THEN
-    assertEquals(Fare.BIKE_RATE_PER_HOUR,
+    assertEquals(
+        Fare.BIKE_RATE_PER_HOUR,
         price,
         "For 1 hour bike parking, fare must be equal to Fare.BIKE_RATE_PER_HOUR");
   } 
@@ -139,7 +140,7 @@ class FareCalculatorServiceTest {
     
     //THEN
     assertEquals(
-        (0.75 * Fare.BIKE_RATE_PER_HOUR),
+        (double) Math.round((0.75 * Fare.BIKE_RATE_PER_HOUR) * 100) / 100,
         price,
         "3/4 hour fare for bike must be 3/4 of Fare.BIKE_RATE_PER_HOUR");
   } 
@@ -181,7 +182,7 @@ class FareCalculatorServiceTest {
     
     //THEN
     assertEquals(
-        (0.75 * Fare.CAR_RATE_PER_HOUR),
+        (double) Math.round((0.75 * Fare.CAR_RATE_PER_HOUR) * 100) / 100,
         price,
         "3/4 hour fare for car must be 3/4 of Fare.CAR_RATE_PER_HOUR");
   } 
@@ -224,7 +225,7 @@ class FareCalculatorServiceTest {
     
     //THEN
     assertEquals(
-        (30 * Fare.CAR_RATE_PER_HOUR),
+        (double) Math.round((30 * Fare.CAR_RATE_PER_HOUR) * 100) / 100,
         price,
         "Car fare for 30 hours must be ( 30 * Fare.CAR_RATE_PER_HOUR )");
   } 
@@ -246,7 +247,7 @@ class FareCalculatorServiceTest {
     
     //THEN
     assertEquals(
-        (30 * Fare.BIKE_RATE_PER_HOUR),
+        (double) Math.round((30 * Fare.BIKE_RATE_PER_HOUR) * 100) / 100,
         price,
         "Bike fare for 30 hours must be ( 30 * Bike.CAR_RATE_PER_HOUR )");
   } 
@@ -267,7 +268,7 @@ class FareCalculatorServiceTest {
     
     //THEN
     assertEquals(
-        Fare.CAR_RATE_PER_HOUR * 95 / 100,
+        (double) Math.round((double) (Fare.CAR_RATE_PER_HOUR * 95 / 100) * 100) / 100,
         price,
         "Car fare for 1 hour and 5% discount must be 95% of Fare.CAR_RATE_PER_HOUR");
   } 
@@ -285,10 +286,10 @@ class FareCalculatorServiceTest {
 
     //WHEN
     double price = fareCalculatorService.calculateFare(ticket);
-    
+  
     //THEN
     assertEquals(
-        Fare.BIKE_RATE_PER_HOUR * 95 / 100,
+        (double) Math.round((double) (Fare.BIKE_RATE_PER_HOUR * 95 / 100) * 100) / 100,
         price,
         "Bike fare for 1 hour and 5% discount must be 95% of Fare.Bike_RATE_PER_HOUR");
   } 
