@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +22,8 @@ import com.parkit.parkingsystem.service.SystemDateService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -69,7 +72,6 @@ class ParkingServiceTest {
         discountCalculatorService);
     
   } 
-  
   
   @Test
   void getNextParkingNumberIfAvailableTest_souldReturnTypeCarId999() {
@@ -141,22 +143,19 @@ class ParkingServiceTest {
         "Invalid Input User. resultParkingSpot must be null");
   }
   
-
   @Test
+  @DisplayName("Check that processIncomingVehicle correctly saves Ticket and updates ParkingSpot in database")
   void processIncomingVehicleTest() {
     
     try {
       //GIVEN
-      //Mock systemDateService:
-      when(systemDateService.getCurrentDate()).thenReturn(new Date(inTimeMillis));
-      //Mock inputReaderUtil:
-      when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-      when(inputReaderUtil.readSelection()).thenReturn(1);
-      //Mock parkingSpotDAO:
       ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
-      when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
+      //following chronological order in ParkingService.processIncomingVehicle():
+      when(inputReaderUtil.readSelection()).thenReturn(1);
       when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);
-      //Mock discountCalculatorService:
+      when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
+      when(systemDateService.getCurrentDate()).thenReturn(new Date(inTimeMillis));
+      when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
       when(discountCalculatorService.calculateDiscount(any(Ticket.class))).thenReturn(discount);
       
     } catch (Exception e) {
@@ -209,31 +208,95 @@ class ParkingServiceTest {
         parkingSpot.isAvailable(),
         "Car is entering so parking Spot 1 must be set unavailable");
   } 
+  
+  @Test
+  @DisplayName("Check that processIncomingVehicle does not process ticket if Reg number is empty")
+  void processIncomingVehicleTest_RegNumber_Exception() {
+    
+    try {
+      //GIVEN
+      //following chronological order in ParkingService.processIncomingVehicle():
+      when(inputReaderUtil.readSelection()).thenReturn(1); //vehicle type = CAR
+      when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(1);//ParkingSpot id = 1
+      when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(Exception.class);
+          
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
 
+    //WHEN
+    parkingService.processIncomingVehicle();
+
+    //THEN
+    verify(ticketDAO, Mockito.times(0)).saveTicket(any(Ticket.class));
+  } 
 
   @Test
+  @DisplayName("Check that processIncomingVehicle does not process ticket if ParkingSpot id is invalid")
+  void processIncomingVehicleTest_ParkingSpotIdInvalid() {
+    
+    try {
+      //GIVEN
+      //Mock inputReaderUtil:
+      when(inputReaderUtil.readSelection()).thenReturn(1);
+      //Mock parkingSpotDAO:
+      when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(0);
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
+
+    //WHEN
+    parkingService.processIncomingVehicle();
+
+    //THEN
+    verify(ticketDAO, Mockito.times(0)).saveTicket(any(Ticket.class));
+
+  } 
+  
+  @Test
+  @DisplayName("Check that processIncomingVehicle does not process ticket if ParkingSpot is not available")
+  void processIncomingVehicleTest_NoParkingSpotAvailable() {
+    
+    try {
+      //GIVEN
+      //Mock inputReaderUtil:
+      when(inputReaderUtil.readSelection()).thenReturn(1);
+      //Mock parkingSpotDAO:
+      when(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).thenReturn(-1);
+            
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
+
+    //WHEN
+    parkingService.processIncomingVehicle();
+
+    //THEN
+    verify(ticketDAO, Mockito.times(0)).saveTicket(any(Ticket.class));
+    
+  } 
+
+  @Test
+  @DisplayName("Check that processExitingVehicle correctly saves Ticket and updates ParkingSpot in database")
   void processExitingVehicleTest() {
  
     try {
       //GIVEN
-      //Mock systemDateService:
-      when(systemDateService.getCurrentDate()).thenReturn(new Date(outTimeMillis));
-      //Mock inputReaderUtil:
-      when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-      //Mock parkingSpotDAO:
       ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
-      when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
-      //Mock ticketDAO:
       Ticket ticket = new Ticket();
       ticket.setId(123456);
       ticket.setInTime(new Date(inTimeMillis));
       ticket.setVehicleRegNumber("ABCDEF");
       ticket.setDiscountPercentage(discount);
       ticket.setParkingSpot(parkingSpot);
+      //following chronological order:
+      when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
       when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
-      when(ticketDAO.updateTicket(ticket)).thenReturn(true);
-      //Mock FareCalculatorService:
+      when(systemDateService.getCurrentDate()).thenReturn(new Date(outTimeMillis));
       when(fareCalculatorService.calculateFare(any(Ticket.class))).thenReturn(1000.123d);
+      when(ticketDAO.updateTicket(ticket)).thenReturn(true);
+      when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -291,5 +354,65 @@ class ParkingServiceTest {
         parkingSpot.isAvailable(),
         "Car is exiting so parking Spot 1 must be set available");
   } 
+  
+  @Test
+  @DisplayName("Check that processExitingVehicle does not "
+      + "update ParkingSpot nor Ticket if regNumber is empty")
+  void processExitingVehicleTest_RegNumber_Exception() {
+ 
+    try {
+      //GIVEN
+      when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(Exception.class);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to set up test mock objects");
+    } 
+
+    //WHEN
+    parkingService.processExitingVehicle();
+
+    //THEN
+    //TICKET UPDATE:
+    verify(ticketDAO, Mockito.times(0)).updateTicket(any(Ticket.class));
+    verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+    
+  } 
+  
+  @Test
+  @DisplayName("Check that processExitingVehicle does not "
+      + "update ParkingSpot if Ticket update has failed")
+  void processExitingVehicleTest_TicketUpdateHasFailed() {
+ 
+    try {
+      //GIVEN
+      ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+      Ticket ticket = new Ticket();
+      ticket.setId(123456);
+      ticket.setInTime(new Date(inTimeMillis));
+      ticket.setVehicleRegNumber("ABCDEF");
+      ticket.setDiscountPercentage(discount);
+      ticket.setParkingSpot(parkingSpot);
+      //following chronological order:
+      when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+      when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
+      when(systemDateService.getCurrentDate()).thenReturn(new Date(outTimeMillis));
+      when(fareCalculatorService.calculateFare(any(Ticket.class))).thenReturn(1000.123d);
+      when(ticketDAO.updateTicket(ticket)).thenReturn(false); //FAILED !
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to set up test mock objects");
+    } 
+
+    //WHEN
+    parkingService.processExitingVehicle();
+
+    //THEN
+    verify(ticketDAO, Mockito.times(1)).updateTicket(any(Ticket.class));
+    verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+  } 
+  
+  
   
 } 
