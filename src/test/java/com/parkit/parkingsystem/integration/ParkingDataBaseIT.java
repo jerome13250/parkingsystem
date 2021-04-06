@@ -51,10 +51,11 @@ class ParkingDataBaseIT {
   @BeforeAll
   private static void setUp() throws Exception {
     fareCalculatorService = new FareCalculatorService();
-    parkingSpotDAO = new ParkingSpotDAO();
+    
     parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
-    ticketDAO = new TicketDAO();
-    ticketDAO.dataBaseConfig = dataBaseTestConfig;
+    parkingSpotDAO = new ParkingSpotDAO(dataBaseTestConfig);
+    ticketDAO = new TicketDAO(dataBaseTestConfig);
+    
     dataBasePrepareService = new DataBasePrepareService();
     discountCalculatorService = new DiscountCalculatorService(ticketDAO);
   } 

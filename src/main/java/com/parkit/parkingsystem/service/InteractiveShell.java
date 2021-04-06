@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem.service;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -20,8 +21,11 @@ public class InteractiveShell {
     boolean continueApp = true;
     FareCalculatorService fareCalculatorService = new FareCalculatorService();
     InputReaderUtil inputReaderUtil = new InputReaderUtil();
-    ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO();
-    TicketDAO ticketDAO = new TicketDAO();
+
+    DataBaseConfig dataBaseConfig = new DataBaseConfig();
+    ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO(dataBaseConfig);
+    TicketDAO ticketDAO = new TicketDAO(dataBaseConfig);
+    
     SystemDateService systemDateService = new SystemDateService();
     DiscountCalculatorService discountCalculatorService = new DiscountCalculatorService(ticketDAO);
     

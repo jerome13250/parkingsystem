@@ -13,9 +13,12 @@ import org.apache.logging.log4j.Logger;
 public class ParkingSpotDAO {
   private static final Logger logger = LogManager.getLogger("ParkingSpotDAO");
 
-  public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+  public DataBaseConfig dataBaseConfig;
 
-  
+  public ParkingSpotDAO(DataBaseConfig dataBaseConfig) {
+    this.dataBaseConfig = dataBaseConfig;
+  }
+
   /**
    * Get the next parking slot available according to the parking type required.
    *

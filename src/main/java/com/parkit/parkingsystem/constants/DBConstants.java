@@ -16,13 +16,15 @@ public class DBConstants {
       "insert into ticket("
       + "PARKING_NUMBER, "
       + "VEHICLE_REG_NUMBER, "
-      + "PRICE, IN_TIME, "
+      + "PRICE, "
+      + "IN_TIME, "
       + "OUT_TIME, "
       + "DISCOUNT_PC)"
       + " values(?, ?, ?, ?, ?, ?)";
   public static final String UPDATE_TICKET = 
       "update ticket "
-      + "set PRICE=?, OUT_TIME=? "
+      + "set PRICE=?, "
+      + "OUT_TIME=? "
       + "where ID=?";
   public static final String GET_TICKET = 
       "select t.PARKING_NUMBER, "

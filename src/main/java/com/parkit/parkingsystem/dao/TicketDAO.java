@@ -16,7 +16,11 @@ public class TicketDAO {
 
   private static final Logger logger = LogManager.getLogger("TicketDAO");
 
-  public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+  public DataBaseConfig dataBaseConfig;
+  
+  public TicketDAO(DataBaseConfig dataBaseConfig) {
+    this.dataBaseConfig = dataBaseConfig;
+  }
 
   /**
    * Save a Ticket object to database.
@@ -69,7 +73,6 @@ public class TicketDAO {
     ResultSet rs = null;
     try {
       con = dataBaseConfig.getConnection();
-      //TODO: la requete est fausse "order by t.IN_TIME  " manque un DESC
       ps = con.prepareStatement(DBConstants.GET_TICKET); 
       //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
       ps.setString(1, vehicleRegNumber);
